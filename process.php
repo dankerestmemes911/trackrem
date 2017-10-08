@@ -6,6 +6,7 @@
     $mysql_db = "database";
 
     $ikwyd_key = "ikwydkey";
+    $pinguser = true;
   // ENDING OF SETTINGS
 
   function txtlog($text) {
@@ -13,7 +14,7 @@
   }
 
   $conn = new mysqli($mysql_server, $mysql_user, $mysql_pass, $mysql_db);
-  $sql1 = "SELECT ip, date FROM trackrem_processrequests";
+  $sql1 = "SELECT ip, date, platform, browser FROM trackrem_processrequests";
   $result1 = $conn->query($sql1);
   txtlog("Connected to MySQL server");
 
@@ -24,8 +25,18 @@
         txtlog($row['ip'] . " is already in database. Continuing to next IP.");
         continue;
       }
-      $country_info = json_decode(file_get_contents("http://api.ipaddress.com/iptocountry?format=json&ip=" . $row['ip']));
-      $data_country = $country_info['country_code'];
+      $country_info = json_decode(file_get_contents("http://ip-api.com/json/" . $row['ip']));
+      if ($country_info['status'] == "success") {
+        txtlog("Found geolocation for " . $row['ip']);
+        $data_country = $country_info['countryCode'];
+        $data_region = $country_info['region'];
+        $data_city = $country_info['city'];
+        $data_latitude = $country_info['lat'];
+        $data_longitude = $country_info['lon'];
+        $data_zipcode = $country_info['zip'];
+      } else {
+        txtlog("Could not find geolocation for " . $row['ip']);
+      }
       $ikwyd_exists = json_decode(file_get_contents("https://api.antitor.com/history/exist?ip=" . $row['ip'] . "&key=" . $ikwyd_key));
       if ($ikwyd_exists['exists'] = true) {
         txtlog("IKWYD account exists for " . $row['ip'] . ". Getting data from API.");
@@ -45,6 +56,15 @@
         }
       } else {
         txtlog("IKWYD account does not exist for " . $row['ip'] . ". Continuing.");
+      }
+      // FIX PING BY USING API INSTEAD OF EXEC
+      if ($pingip = true) {
+        txtlog("Trying to ping " . $row['ip']);
+        if (var_dump(PHP_OS) = "Linux") {
+          exec("host " . $);
+        }
+      } else {
+        txtlog("Pinging is turned off. Won't ping IP.");
       }
     }
   } else {
