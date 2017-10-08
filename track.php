@@ -12,15 +12,25 @@
     die("Necessary input not given");
   }
 
-  $timestamp = time();
+  if ($_GET['platform']) {
+    $platform = $_GET['platform'];
+  } else {
+    $platform = "unknown";
+  }
+
+  if ($_GET['parent']) {
+    $browser = $_GET['parent'];
+  } else {
+    $browser = "unknown";
+  }
 
   $conn = new mysqli($mysql_server, $mysql_user, $mysql_pass, $mysql_db);
   if ($conn->connect_error) {
     die("MySQL Error: " . $conn->connect_error);
   }
 
-  $sql = "INSERT INTO trackrem_processrequests (ip, date)
-  VALUES ('" . $ip . "', '" . $timestamp . "')";
+  $sql = "INSERT INTO trackrem_processrequests (ip, date, platform, browser)
+  VALUES ('" . $ip . "', '" . $timestamp . "', '" . $platform . "', '" . $browser . "')";
 
   if ($conn->query($sql) === TRUE) {
     echo "success";
